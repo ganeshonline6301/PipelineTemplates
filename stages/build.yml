@@ -12,7 +12,7 @@ stages:
 
   jobs:
     - job: build
-      displayName: Build and Test, create artifacts
+      displayName: Build Solution
       pool:
         vmImage: 'windows-latest'
       variables:
