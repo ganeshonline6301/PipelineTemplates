@@ -1,6 +1,5 @@
 # 🧰 PipelineTemplates
 
-![License](https://img.shields.io/github/license/ganeshonline6301/PipelineTemplates)
 ![Last Commit](https://img.shields.io/github/last-commit/ganeshonline6301/PipelineTemplates)
 
 
