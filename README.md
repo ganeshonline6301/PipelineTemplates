@@ -21,6 +21,7 @@ For a quick start, please refer to the [Quick Start Guide](docs/quick-start.md) 
 | `pipeline/` | Full pipeline templates for .NET deployments deploying bicep modules into ACR   |
 | `scripts/`  | Bash/PowerShell scripts used in pipelines      |
 | `stages/`   | Multi-stage definitions for complex pipelines  |
+| `docs/`   | Documentation files, including guides like `quick-start.md`  |
 
 ## 📌 Contribution
 
