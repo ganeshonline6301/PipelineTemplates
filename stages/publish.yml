@@ -1,0 +1,85 @@
+parameters:
+  - name: serviceConnection
+    displayName: ServiceConnection
+    type: string
+  - name: resourceGroupName
+    displayName: ResourceGroupName
+    type: string
+  - name: serviceName
+    displayName: ServiceName
+    type: string
+  - name: environment
+    displayName: Environment
+    type: string
+  - name: parametersFilePath
+    displayName: ParametersFilePath
+    type: string
+  - name: containerRegistryName
+    displayName: ContainerRegistryName
+    type: string
+
+stages:
+- stage: Publish
+  displayName: Publish Modules
+
+  jobs:
+    - deployment: DeployInfrastructure
+      displayName: "Deploy Infrastructure"
+      pool:
+        vmImage: 'windows-latest'
+      environment: ${{ parameters.ServiceName }}-${{ parameters.Environment }}
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - template: ../jobs/deploy-infra.yml
+                parameters:
+                  ServiceConnection: ${{ parameters.ServiceConnection }}
+                  ResourceGroupName: ${{ parameters.ResourceGroupName }}
+                  Environment: ${{ parameters.Environment }}
+                  BicepFilePath: $(Build.SourcesDirectory)/biceps/containerregistry.bicep
+                  ParametersFilePath: ${{ parameters.ParametersFilePath }}
+              
+    - job: publish
+      displayName: Publish modules to ACR
+      dependsOn: DeployInfrastructure
+      condition: succeeded()
+      pool:
+        vmImage: 'windows-latest'
+      steps:
+        - template: ../jobs/publish-modules.yml
+          parameters:
+            BicepFilePath: $(Build.SourcesDirectory)/biceps/appservice.bicep
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            ContainerRegistry: ${{ parameters.ContainerRegistryName }}
+            ModuleName: appservice
+        - template: ../jobs/publish-modules.yml
+          parameters:
+            BicepFilePath: $(Build.SourcesDirectory)/biceps/cosmosdb.bicep
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            ContainerRegistry: ${{ parameters.ContainerRegistryName }}
+            ModuleName: cosmosdb
+        - template: ../jobs/publish-modules.yml
+          parameters:
+            BicepFilePath: $(Build.SourcesDirectory)/biceps/appinsights.bicep
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            ContainerRegistry: ${{ parameters.ContainerRegistryName }}
+            ModuleName: appinsights
+        - template: ../jobs/publish-modules.yml
+          parameters:
+            BicepFilePath: $(Build.SourcesDirectory)/biceps/sqlserver.bicep
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            ContainerRegistry: ${{ parameters.ContainerRegistryName }}
+            ModuleName: sqlserver
+        - template: ../jobs/publish-modules.yml
+          parameters:
+            BicepFilePath: $(Build.SourcesDirectory)/biceps/sqldb.bicep
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            ContainerRegistry: ${{ parameters.ContainerRegistryName }}
+            ModuleName: sqldb
+        - template: ../jobs/publish-modules.yml
+          parameters:
+            BicepFilePath: $(Build.SourcesDirectory)/biceps/keyvault.bicep
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            ContainerRegistry: ${{ parameters.ContainerRegistryName }}
+            ModuleName: keyvault

@@ -1,0 +1,27 @@
+parameters:
+  - name: solutionFile
+    displayName: SolutionFile
+    type: string
+  - name: projectName
+    displayName: ProjectName
+    type: string
+
+stages:
+- stage: Build
+  displayName: Build ${{ parameters.ProjectName }}
+
+  jobs:
+    - job: build
+      displayName: Build and Test, create artifacts
+      pool:
+        vmImage: 'windows-latest'
+      variables:
+        BuildConfiguration: 'Release'
+        DotnetVersion: '<your-dotnet-version>'
+      steps:
+        - template: ../jobs/build-dotnet.yml
+          parameters:
+            SolutionFile: ${{ parameters.SolutionFile }}
+            ArtifactName: ${{ parameters.ProjectName }}
+            BuildConfiguration: $(BuildConfiguration)
+            DotnetVersion: $(DotnetVersion)    

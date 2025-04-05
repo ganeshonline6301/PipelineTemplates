@@ -1,0 +1,28 @@
+parameters:
+  - name: appServiceName
+    displayName: AppServiceName
+    type: string
+  - name: projectName
+    displayName: ProjectName
+    type: string
+  - name: serviceConnection
+    displayName: ServiceConnection
+    type: string
+
+steps:
+- checkout: self
+  clean: true
+
+- task: DownloadPipelineArtifact@2
+  inputs:
+    artifactName: '${{ parameters.ProjectName }}'
+    buildType: 'current'
+    targetPath: '$(Build.ArtifactStagingDirectory)\${{ parameters.ProjectName }}'
+
+- task: AzureWebApp@1
+  displayName: 'Deploy to ${{ parameters.AppServiceName }}'
+  inputs:
+    azureSubscription: '${{ parameters.ServiceConnection }}'
+    appType: 'webApp'
+    appName: '${{ parameters.AppServiceName }}'
+    package: '$(Build.ArtifactStagingDirectory)\${{ parameters.ProjectName }}\${{ parameters.ProjectName }}.zip'

@@ -1,0 +1,31 @@
+parameters:
+  - name: resourceGroupName
+    displayName: ResourceGroupName
+    type: string
+  - name: environment
+    displayName: Environment
+    type: string
+  - name: serviceConnection
+    displayName: ServiceConnection
+    type: string
+  - name: bicepFilePath
+    displayName: BicepFilePath
+    type: string
+  - name: parametersFilePath
+    displayName: ParametersFilePath
+    type: string
+
+steps:
+  - checkout: self
+  
+  - task: AzureCLI@2
+    displayName: "Deploy Resources"
+    inputs:
+      azureSubscription: ${{ parameters.ServiceConnection }}
+      scriptType: pscore
+      scriptLocation: inlineScript
+      inlineScript: |
+        az deployment group create `
+          --resource-group "${{ parameters.resourceGroupName }}" `
+          --template-file "${{ parameters.BicepFilePath }}" `
+          --parameters "@${{ parameters.ParametersFilePath }}"

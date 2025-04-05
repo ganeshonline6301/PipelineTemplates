@@ -1,0 +1,18 @@
+trigger :
+  branches:
+    include:
+      - main
+      - master
+  paths:
+    include:
+      - pipeline
+
+stages:
+  - template: ../stages/publish.yml
+    parameters:
+      ServiceConnection: '<your-service-connection-name>'
+      ResourceGroupName: '<your-resource-group-name>'
+      ServiceName: '<your-service-name>'
+      Environment: '<your-environment>'
+      ParametersFilePath: $(Build.SourcesDirectory)/pipeline/parameters.json
+      ContainerRegistryName: '<your-container-registry-name>'

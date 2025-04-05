@@ -1,0 +1,64 @@
+parameters:
+  - name: solutionFile
+    displayName: SolutionFile
+    type: string
+  - name: dotnetVersion
+    displayName: DotnetVersion
+    type: string
+  - name: artifactName
+    displayName: ArtifactName
+    type: string 
+  - name: buildConfiguration
+    displayName: BuildConfiguration
+    type: string
+
+steps:
+- checkout: self
+  clean: true
+
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK'
+  inputs:
+    version: ${{ parameters.DotnetVersion }}
+
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet restore'
+  inputs:
+    command: restore
+    projects: ${{ parameters.SolutionFile }}
+
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet build'
+  inputs:
+    projects: ${{ parameters.SolutionFile }}
+    arguments: --configuration $(BuildConfiguration) --no-restore
+
+- task: DotNetCoreCLI@2
+  displayName: Publish
+  inputs:
+    command: publish
+    publishWebProjects: false
+    zipAfterPublish: true
+    projects: ${{ parameters.SolutionFile }}
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) --no-restore'
+
+- task: PowerShell@2
+  displayName: Rename Zip File
+  inputs:
+    targetType: 'inline'
+    script: |
+      $zipFile = Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)" -Filter "*.zip" | Select-Object -First 1
+      if ($zipFile) {
+          $newName = "$(Build.ArtifactStagingDirectory)\${{ parameters.ArtifactName }}.zip"
+          Rename-Item -Path $zipFile.FullName -NewName $newName
+          Write-Host "Renamed $($zipFile.Name) to ${{ parameters.ArtifactName }}.zip"
+      } else {
+          Write-Host "No zip file found."
+      }
+
+- task: PublishPipelineArtifact@1
+  displayName: Publish pipeline artifacts
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+    artifactName: '${{ parameters.ArtifactName }}'
+    publishLocation: 'pipeline'

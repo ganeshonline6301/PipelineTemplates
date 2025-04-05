@@ -1,0 +1,63 @@
+parameters:
+  - name: environment
+    displayName: Environment
+    type: string
+  - name: projectName
+    displayName: ProjectName
+    type: string 
+  - name: serviceName
+    displayName: ServiceName
+    type: string
+  - name: resourceGroupName
+    displayName: ResourceGroupName
+    type: string
+  - name: appServiceName
+    displayName: AppServiceName
+    type: string
+  - name: serviceConnection
+    displayName: ServiceConnection
+    type: string
+  - name: bicepFilePath
+    displayName: BicepFilePath
+    type: string
+  - name: parametersFilePath
+    displayName: ParametersFilePath
+    type: string
+
+stages:
+- stage: Deploy_${{ parameters.Environment }}
+  displayName: Release to ${{ parameters.Environment }}
+
+  jobs:
+  - deployment: DeployInfrastructure
+    displayName: "Deploy Infrastructure"
+    pool:
+      vmImage: 'windows-latest'
+    environment: ${{ parameters.ServiceName }}-${{ parameters.Environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../jobs/deploy-infra.yml
+              parameters:
+                serviceConnection: ${{ parameters.ServiceConnection }}
+                resourceGroupName: ${{ parameters.ResourceGroupName }}
+                environment: ${{ parameters.Environment }}
+                bicepFilePath: ${{ parameters.BicepFilePath }}
+                parametersFilePath: ${{ parameters.ParametersFilePath }}
+
+  - deployment: DeployWebApp
+    displayName: Deploy WebApp to Azure
+    dependsOn: DeployInfrastructure
+    pool:
+      vmImage: 'windows-latest'
+    environment: ${{ parameters.ServiceName }}-${{ parameters.Environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../jobs/deploy-webapp.yml
+              parameters:
+                AppServiceName: ${{ parameters.AppServiceName }}
+                ProjectName: ${{ parameters.ProjectName }}
+                ServiceConnection: ${{ parameters.ServiceConnection }}
