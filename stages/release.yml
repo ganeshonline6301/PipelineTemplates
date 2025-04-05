@@ -47,7 +47,7 @@ stages:
                 parametersFilePath: ${{ parameters.ParametersFilePath }}
 
   - deployment: DeployWebApp
-    displayName: Deploy WebApp to Azure
+    displayName: Web App Deployment
     dependsOn: DeployInfrastructure
     pool:
       vmImage: 'windows-latest'

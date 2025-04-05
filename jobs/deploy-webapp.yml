@@ -14,13 +14,14 @@ steps:
   clean: true
 
 - task: DownloadPipelineArtifact@2
+  displayName: 'Download Artifact: ${{ parameters.ProjectName }}'
   inputs:
     artifactName: '${{ parameters.ProjectName }}'
     buildType: 'current'
     targetPath: '$(Build.ArtifactStagingDirectory)\${{ parameters.ProjectName }}'
 
 - task: AzureWebApp@1
-  displayName: 'Deploy to ${{ parameters.AppServiceName }}'
+  displayName: 'Deploy Web App: ${{ parameters.AppServiceName }}'
   inputs:
     azureSubscription: '${{ parameters.ServiceConnection }}'
     appType: 'webApp'

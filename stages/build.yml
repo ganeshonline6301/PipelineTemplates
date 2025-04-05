@@ -12,7 +12,7 @@ stages:
 
   jobs:
     - job: build
-      displayName: Build and Test, create artifacts
+      displayName: 'Build and Package: ${{ parameters.ProjectName }}'
       pool:
         vmImage: 'windows-latest'
       variables:

@@ -22,19 +22,19 @@ steps:
     version: ${{ parameters.DotnetVersion }}
 
 - task: DotNetCoreCLI@2
-  displayName: 'Dotnet restore'
+  displayName: 'Restore Dependencies'
   inputs:
     command: restore
     projects: ${{ parameters.SolutionFile }}
 
 - task: DotNetCoreCLI@2
-  displayName: 'Dotnet build'
+  displayName: 'Build Solution'
   inputs:
     projects: ${{ parameters.SolutionFile }}
     arguments: --configuration $(BuildConfiguration) --no-restore
 
 - task: DotNetCoreCLI@2
-  displayName: Publish
+  displayName: 'Publish Artifacts'
   inputs:
     command: publish
     publishWebProjects: false
@@ -43,7 +43,7 @@ steps:
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) --no-restore'
 
 - task: PowerShell@2
-  displayName: Rename Zip File
+  displayName: 'Rename Published Zip to ${{ parameters.ArtifactName }}.zip'
   inputs:
     targetType: 'inline'
     script: |
@@ -57,7 +57,7 @@ steps:
       }
 
 - task: PublishPipelineArtifact@1
-  displayName: Publish pipeline artifacts
+  displayName: 'Publish Artifact: ${{ parameters.ArtifactName }}'
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)'
     artifactName: '${{ parameters.ArtifactName }}'
