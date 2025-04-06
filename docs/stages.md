@@ -20,9 +20,19 @@ This stage is responsible for building a .NET application. It integrates with th
   - Restores dependencies and builds the solution.
   - Publishes the output and stores it as an artifact.
 
-### **Steps**
-1. **Job**: `build` - The job runs on `windows-latest` VM and uses the **`build-dotnet.yml`** template to handle the build and artifact creation.
-2. **Job Execution**: The `.NET solution` is built using the defined `.NET version` and configuration (`Release` by default).
+### **🔨 Steps Inside the Stage**
+1.**Build Dotnet**
+- Runs On: windows-latest agent
+- Variables:
+  - BuildConfiguration: Set to Release
+  - DotnetVersion: Define your .NET SDK version (e.g., 8.0.x)
+- Template Used: build-dotnet.yml
+
+📦 **What It Does**:
+- Restores dependencies
+- Builds the solution
+- Runs tests
+- Publishes and saves the artifact for later stages
 
 ### **Example Usage**
 ```yaml
@@ -54,22 +64,31 @@ stages:
 This stage handles the deployment of infrastructure and the web application to Azure. It uses the `deploy-infra.yml` and `deploy-webapp.yml` job templates.
 
 ### **Parameters**
-- **`environment`**: The deployment environment (e.g., dev, prod).
+- **`environment`**: The deployment environment (e.g., `dev`, `prod`).
 - **`projectName`**: The name of the project (artifact).
-- **`serviceName`**: The name of the service (e.g., App Service).
+- **`serviceName`**: Refers to the Azure Pipeline Environment name (e.g., `dev`, `prod`) used for organizing and managing deployments.
 - **`resourceGroupName`**: The name of the resource group.
 - **`appServiceName`**: The name of the Azure App Service.
 - **`serviceConnection`**: The Azure service connection to use.
 - **`bicepFilePath`**: Path to the Bicep file for infrastructure deployment.
 - **`parametersFilePath`**: Path to the Bicep parameters file.
 
+>⚠️**Note**: Before running the CI/CD pipeline, make sure the environment (e.g., `dev`, `prod`) is created in **Azure DevOps** under **Pipelines > Environments**. This enables the pipeline to target specific deployment environments, manage approvals, and monitor releases effectively.
+
 ### **Stages**
 - **Deploy Infrastructure**: This stage deploys infrastructure using the `deploy-infra.yml` job template.
 - **Deploy WebApp**: This stage deploys the web application to Azure App Service using the `deploy-webapp.yml` template.
 
-### **Steps**
-1. **Deploy Infrastructure**: Runs the `deploy-infra.yml` job template to deploy infrastructure using the specified Bicep file.
-2. **Deploy WebApp**: Deploys the web app to the Azure App Service after the infrastructure is deployed.
+### **🔨 Steps Inside the Stage**
+1.**Deploy Infrastructure**
+- Uses `deploy-infra.yml` template
+- Deploys infrastructure like App Service, Storage, etc.
+- ✅ Runs first
+
+2.**Deploy WebApp**
+- Uses deploy-webapp.yml template
+- Deploys your actual app to Azure App Service
+- ✅ Runs after infrastructure is deployed
 
 ### **Example Usage**
 ```yaml
@@ -122,8 +141,8 @@ The `Publish` stage is designed for deploying infrastructure (using Bicep) and p
 ### **Parameters**
 - **`serviceConnection`**: The Azure service connection to use for authentication.
 - **`resourceGroupName`**: The Azure resource group for deployment.
-- **`serviceName`**: The name of the service (e.g., App Service).
-- **`environment`**: The deployment environment (e.g., dev, prod).
+- **`serviceName`**: Refers to the Azure Pipeline Environment name (e.g., `dev`, `prod`) used for organizing and managing deployments.
+- **`environment`**: The deployment environment (e.g., `dev`, `prod`).
 - **`parametersFilePath`**: The path to the Bicep parameters file.
 - **`containerRegistryName`**: The name of the Azure Container Registry (ACR).
 
@@ -131,9 +150,15 @@ The `Publish` stage is designed for deploying infrastructure (using Bicep) and p
 - **Deploy Infrastructure**: This stage deploys infrastructure using the `deploy-infra.yml` job template.
 - **Publish Modules**: After infrastructure deployment, the `publish-modules.yml` template publishes modules (e.g., AppService, CosmosDB) to ACR.
 
-### **Steps**
-1. **Deploy Infrastructure**: Runs the `deploy-infra.yml` job template to deploy infrastructure using the specified Bicep file.
-2. **Publish Modules**: Runs multiple instances of `publish-modules.yml` for different modules (e.g., AppService, CosmosDB, SQLServer, etc.).
+### **🔨 Steps Inside the Stage**
+1.**Deploy Infrastructure**
+- Uses `deploy-infra.yml` template
+- Deploys infrastructure like App Service, Storage, etc.
+- ✅ Runs first
+
+2.**Publish**
+- Publishes various infrastructure modules to ACR.
+- ✅ Runs after infrastructure is deployed
 
 ### **Example Usage**
 ```yaml
