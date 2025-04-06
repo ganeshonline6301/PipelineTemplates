@@ -34,9 +34,13 @@ This pipeline file demonstrates the use of the `publish.yml` stage template from
 - **Parameters**: The pipeline passes required parameters, including:
   - **`ServiceConnection`**: The Azure service connection used for authentication.
   - **`ResourceGroupName`**: The name of the Azure Resource Group where the resources will be deployed.
-  - **`ServiceName`**: The name of the service (e.g., App Service or other).
-  - **`Environment`**: The environment to deploy to (e.g., `dev`, `prod`).
+  - **`ServiceName`**: Refers to the Azure Pipeline Environment name (e.g., `dev`, `prod`) used for organizing and managing deployments.
+  - **`Environment`**: The actual deployment environment (e.g., `dev`, `prod`). This may be used for setting conditions, naming conventions, or environment-specific settings.
   - **`ParametersFilePath`**: The path to the `parameters.json` file, which contains deployment configurations.
+  - **`ContainerRegistryName`**: The name of your Azure Container Registry (ACR).
+
+> ⚠️**Note:** Before running the CI/CD pipeline, make sure the environment (e.g., `dev`, `prod`) is created in **Azure DevOps** under **Pipelines > Environments**. This enables the pipeline to target specific deployment environments, manage approvals, and monitor releases effectively.
+
 
 ### Example of `pipeline.yml`:
 
@@ -65,7 +69,7 @@ stages:
 
 ### Stages Section
 
-This pipeline uses the `publish.yml` stage template located in the `stages` folder. The `publish.yml` template will deploy infrastructure to Azure using Bicep templates and publish modules to Azure Container Registry (ACR).
+This pipeline uses the `publish.yml` stage template located in the [stages](stages/publish.yml) folder. The `publish.yml` template will deploy infrastructure to Azure using Bicep templates and publish modules to Azure Container Registry (ACR).
 
 ### YAML Configuration
 
@@ -73,27 +77,13 @@ This pipeline uses the `publish.yml` stage template located in the `stages` fold
 stages:
   - template: ../stages/publish.yml
     parameters:
-      ServiceConnection: '<your-service-connection-name>'
-      ResourceGroupName: '<your-resource-group-name>'
-      ServiceName: '<your-service-name>'
-      Environment: '<your-environment>'
+      ServiceConnection: 'my-azure-service-connection'
+      ResourceGroupName: 'my-app-rg'
+      ServiceName: 'infra-dev'
+      Environment: 'dev'
       ParametersFilePath: $(Build.SourcesDirectory)/pipeline/parameters.json
-      ContainerRegistryName: '<your-container-registry-name>'
+      ContainerRegistryName: 'mycontainerregistry'
 ```
-
-### Parameter Breakdown
-
-- **ServiceConnection**: The Azure service connection to use for authentication (e.g., `MyAzureConnection`).
-
-- **ResourceGroupName**: The name of the Azure resource group where resources will be deployed (e.g., `MyResourceGroup`).
-
-- **ServiceName**: The name of the service (e.g., `MyAppService`).
-
-- **Environment**: The environment (e.g., `dev`, `prod`) to deploy the service to.
-
-- **ParametersFilePath**: Path to the `parameters.json` file used to define values for resources like Azure Container Registry and location.
-
-- **ContainerRegistryName**: The name of your Azure Container Registry (e.g., `MyContainerRegistry`).
 
 ### Parameters File: `parameters.json`
 
@@ -141,8 +131,8 @@ For example, you could use the `build.yml` or `release.yml` templates by adjusti
 ```yaml
 - template: ../stages/build.yml
   parameters:
-    SolutionFile: '<your-solution-file-path>'
-    ProjectName: '<your-project-name>'
+    SolutionFile: 'MyApp/MyApp.sln'
+    ProjectName: 'MyApp.WebApi'
 ```
 
 ### Extending the Pipeline
