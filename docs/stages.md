@@ -41,7 +41,7 @@ stages:
   displayName: Build ${{ parameters.ProjectName }}
   jobs:
     - job: build
-      displayName: Build and Test, create artifacts
+      displayName: Build and Package: ${{ parameters.ProjectName }}
       pool:
         vmImage: 'windows-latest'
       variables:
@@ -114,7 +114,7 @@ stages:
                 parametersFilePath: ${{ parameters.ParametersFilePath }}
 
   - deployment: DeployWebApp
-    displayName: Deploy WebApp to Azure
+    displayName: Web App Deployment
     dependsOn: DeployInfrastructure
     pool:
       vmImage: 'windows-latest'
